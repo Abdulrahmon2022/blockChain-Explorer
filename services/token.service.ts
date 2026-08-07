@@ -1,50 +1,46 @@
 import { TokenInfo, TokenTransfer, ApiResponse } from "@/types";
-import { mockTokens, mockTokenTransfers } from "./mockData";
+import { apiGet, query } from "./client";
 
+/**
+ * There is no on-chain registry of "all tokens" — that needs an index of
+ * contract deployments. Look tokens up by address instead.
+ */
 export async function getTokens(): Promise<ApiResponse<TokenInfo[]>> {
-  await new Promise(resolve => setTimeout(resolve, 300));
-  return { data: mockTokens };
+  return {
+    data: [],
+    error: "Listing all tokens requires an indexer. Search for a token by address.",
+  };
 }
 
 export async function getToken(address: string): Promise<ApiResponse<TokenInfo | null>> {
-  await new Promise(resolve => setTimeout(resolve, 300));
-  const addrLower = address.toLowerCase();
-  const token = mockTokens.find(t => t.address.toLowerCase() === addrLower);
-  return { data: token || null };
+  return apiGet<TokenInfo | null>(`/api/tokens/${encodeURIComponent(address)}`, null);
 }
 
+/**
+ * Reads Transfer events from a recent block window. `userAddress` is required —
+ * scanning every transfer of a single token across all holders is an indexer job.
+ */
 export async function getTokenTransfers(
   page: number = 1,
   pageSize: number = 10,
   tokenAddress?: string,
   userAddress?: string
 ): Promise<ApiResponse<TokenTransfer[]>> {
-  await new Promise(resolve => setTimeout(resolve, 400));
-  
-  let filtered = mockTokenTransfers;
-
-  if (tokenAddress) {
-    const tokenAddrLower = tokenAddress.toLowerCase();
-    filtered = filtered.filter(t => t.tokenAddress.toLowerCase() === tokenAddrLower);
+  if (!userAddress) {
+    return {
+      data: [],
+      error: "Token transfers can only be listed for a specific address.",
+    };
   }
 
-  if (userAddress) {
-    const userAddrLower = userAddress.toLowerCase();
-    filtered = filtered.filter(
-      t => t.from.toLowerCase() === userAddrLower || t.to.toLowerCase() === userAddrLower
-    );
-  }
+  const path = `/api/addresses/${encodeURIComponent(userAddress)}/token-transfers`;
+  const result = await apiGet<TokenTransfer[]>(`${path}${query({ page, pageSize })}`, []);
 
-  const startIndex = (page - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
+  if (!tokenAddress) return result;
 
+  const wanted = tokenAddress.toLowerCase();
   return {
-    data: filtered.slice(startIndex, endIndex),
-    pagination: {
-      currentPage: page,
-      pageSize,
-      totalItems: filtered.length,
-      totalPages: Math.ceil(filtered.length / pageSize),
-    }
+    ...result,
+    data: result.data.filter((t) => t.tokenAddress.toLowerCase() === wanted),
   };
 }
