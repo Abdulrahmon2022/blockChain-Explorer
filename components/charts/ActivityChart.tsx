@@ -132,6 +132,9 @@ export function ActivityChart({ data, title, valueSuffix = "" }: ActivityChartPr
           {data.map((point, i) => {
             const x = getX(i);
             const isHovered = hoveredIndex === i;
+            const labelInterval = Math.max(1, Math.round(data.length / 6));
+            const showLabel = data.length <= 6 || i % labelInterval === 0 || i === data.length - 1;
+
             return (
               <g key={i} className="group">
                 {/* Tick mark */}
@@ -146,18 +149,20 @@ export function ActivityChart({ data, title, valueSuffix = "" }: ActivityChartPr
                 />
                 
                 {/* Date label */}
-                <text
-                  x={x}
-                  y={paddingTop + chartHeight + 14}
-                  textAnchor="middle"
-                  className={`text-[8px] font-semibold transition-all ${
-                    isHovered 
-                      ? "fill-text-primary" 
-                      : "fill-text-tertiary"
-                  }`}
-                >
-                  {point.label}
-                </text>
+                {showLabel && (
+                  <text
+                    x={x}
+                    y={paddingTop + chartHeight + 14}
+                    textAnchor="middle"
+                    className={`text-[8px] font-semibold transition-all ${
+                      isHovered 
+                        ? "fill-text-primary" 
+                        : "fill-text-tertiary"
+                    }`}
+                  >
+                    {point.label}
+                  </text>
+                )}
 
                 {/* Hotspot overlay for hover selection */}
                 <rect
@@ -191,6 +196,14 @@ export function ActivityChart({ data, title, valueSuffix = "" }: ActivityChartPr
                       fill="var(--brand-primary)"
                       className="stroke-bg-tertiary pointer-events-none"
                       strokeWidth="1.5"
+                    />
+                    <circle
+                      cx={x}
+                      cy={getY(point.value)}
+                      r="8"
+                      fill="var(--brand-primary)"
+                      fillOpacity="0.12"
+                      className="pointer-events-none"
                     />
                   </g>
                 )}

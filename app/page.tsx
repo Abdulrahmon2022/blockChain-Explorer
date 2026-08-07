@@ -30,25 +30,21 @@ import {
 export default function Dashboard() {
   const [chartMetric, setChartMetric] = useState<"tps" | "gas" | "volume">("tps");
 
-  // Query network stats
   const { data: statsRes, isLoading: statsLoading, refetch: refetchStats } = useQuery({
     queryKey: ["networkStats"],
     queryFn: () => getNetworkStats(),
   });
 
-  // Query latest blocks
   const { data: blocksRes, isLoading: blocksLoading, refetch: refetchBlocks } = useQuery({
     queryKey: ["latestBlocks"],
     queryFn: () => getLatestBlocks(8),
   });
 
-  // Query latest transactions
   const { data: txsRes, isLoading: txsLoading, refetch: refetchTxs } = useQuery({
     queryKey: ["latestTransactions"],
     queryFn: () => getLatestTransactions(8),
   });
 
-  // Query chart statistics
   const { data: chartRes, isLoading: chartLoading } = useQuery({
     queryKey: ["chartStats", chartMetric],
     queryFn: () => getChartStats(chartMetric),
@@ -65,20 +61,30 @@ export default function Dashboard() {
     refetchTxs();
   };
 
+  // Shared hover treatment for card-like surfaces
+  const hoverCard =
+    "transition-colors duration-150 ease-out " +
+    "hover:border-brand-primary/40 hover:bg-bg-secondary/40";
+
   return (
     <div className="flex flex-col gap-6 sm:gap-8">
       {/* Title / Hero */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border-default pb-6">
         <div>
           <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-text-primary">
-            Blockchain Analytics
+            Blockchain <span className="text-brand-primary">Analytics</span>
           </h1>
           <p className="text-xs text-text-secondary mt-1 font-medium">
             Real-time explorer and dashboard for block validation, gas fee tracking, and transactions.
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={handleRefresh} className="gap-1.5 font-semibold">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            className={`gap-1.5 font-semibold ${hoverCard}`}
+          >
             <RefreshCw className="h-3.5 w-3.5" />
             Refresh
           </Button>
@@ -88,95 +94,103 @@ export default function Dashboard() {
       {/* Network Overview Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Latest Block Card */}
-        <Card className="relative overflow-hidden">
-          <CardContent className="p-5 flex items-center justify-between">
-            <div className="space-y-1">
-              <span className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest">
-                Latest Block
-              </span>
-              <h3 className="text-lg font-extrabold text-text-primary">
-                {statsLoading ? <Skeleton className="h-7 w-24" /> : `#${stats?.latestBlockNumber}`}
-              </h3>
-              <p className="text-[10px] text-text-secondary font-medium">
-                ~{stats?.blockTimeSec}s avg block time
-              </p>
+        <Card className="relative overflow-hidden bg-bg-primary/40 border-border-default/50 hover:border-brand-primary/30 transition-all duration-200">
+          <CardContent className="p-6 flex flex-col gap-4">
+            <div className="flex items-start justify-between">
+              <div className="space-y-2 flex-1">
+                <span className="text-[9px] font-bold text-text-tertiary uppercase tracking-widest block">
+                  Latest Block
+                </span>
+                <h3 className="text-2xl font-extrabold text-text-primary">
+                  {statsLoading ? <Skeleton className="h-8 w-28" /> : `#${stats?.latestBlockNumber}`}
+                </h3>
+              </div>
+              <div className="p-3 bg-brand-primary/10 border border-brand-primary/20 rounded-full flex items-center justify-center shrink-0">
+                <Layers className="h-5 w-5 text-brand-primary" />
+              </div>
             </div>
-            <div className="p-3 bg-bg-secondary border border-border-default rounded-lg text-text-secondary">
-              <Layers className="h-5 w-5 text-accent-block" />
-            </div>
+            <p className="text-[10px] text-text-secondary font-medium">
+              ~{stats?.blockTimeSec}s avg block time
+            </p>
           </CardContent>
         </Card>
 
         {/* Transactions Card */}
-        <Card className="relative overflow-hidden">
-          <CardContent className="p-5 flex items-center justify-between">
-            <div className="space-y-1">
-              <span className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest">
-                Total Transactions
-              </span>
-              <h3 className="text-lg font-extrabold text-text-primary">
-                {statsLoading ? (
-                  <Skeleton className="h-7 w-32" />
-                ) : (
-                  new Intl.NumberFormat("en-US").format(stats?.totalTransactions || 0)
-                )}
-              </h3>
-              <p className="text-[10px] text-text-secondary font-medium">
-                {stats?.tps} TPS average
-              </p>
+        <Card className="relative overflow-hidden bg-bg-primary/40 border-border-default/50 hover:border-brand-primary/30 transition-all duration-200">
+          <CardContent className="p-6 flex flex-col gap-4">
+            <div className="flex items-start justify-between">
+              <div className="space-y-2 flex-1">
+                <span className="text-[9px] font-bold text-text-tertiary uppercase tracking-widest block">
+                  Total Transactions
+                </span>
+                <h3 className="text-2xl font-extrabold text-text-primary">
+                  {statsLoading ? (
+                    <Skeleton className="h-8 w-32" />
+                  ) : (
+                    new Intl.NumberFormat("en-US").format(stats?.totalTransactions || 0)
+                  )}
+                </h3>
+              </div>
+              <div className="p-3 bg-brand-primary/10 border border-brand-primary/20 rounded-full flex items-center justify-center shrink-0">
+                <Database className="h-5 w-5 text-brand-primary" />
+              </div>
             </div>
-            <div className="p-3 bg-bg-secondary border border-border-default rounded-lg text-text-secondary">
-              <Database className="h-5 w-5 text-accent-transaction" />
-            </div>
+            <p className="text-[10px] text-text-secondary font-medium">
+              {stats?.tps} TPS average
+            </p>
           </CardContent>
         </Card>
 
         {/* Gas Price Card */}
-        <Card className="relative overflow-hidden">
-          <CardContent className="p-5 flex items-center justify-between">
-            <div className="space-y-1">
-              <span className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest">
-                Average Gas Price
-              </span>
-              <h3 className="text-lg font-extrabold text-text-primary flex items-baseline gap-1">
-                {statsLoading ? <Skeleton className="h-7 w-20" /> : `${stats?.gasPriceGwei}`}
-                <span className="text-xs font-semibold text-text-secondary">Gwei</span>
-              </h3>
-              <p className="text-[10px] text-text-secondary font-medium">
-                Safe low: {stats ? parseFloat(stats.gasPriceGwei) * 0.9 : 0} Gwei
-              </p>
+        <Card className="relative overflow-hidden bg-bg-primary/40 border-border-default/50 hover:border-brand-primary/30 transition-all duration-200">
+          <CardContent className="p-6 flex flex-col gap-4">
+            <div className="flex items-start justify-between">
+              <div className="space-y-2 flex-1">
+                <span className="text-[9px] font-bold text-text-tertiary uppercase tracking-widest block">
+                  Average Gas Price
+                </span>
+                <h3 className="text-2xl font-extrabold text-text-primary flex items-baseline gap-1">
+                  {statsLoading ? <Skeleton className="h-8 w-20" /> : `${stats?.gasPriceGwei}`}
+                  <span className="text-xs font-semibold text-text-secondary">Gwei</span>
+                </h3>
+              </div>
+              <div className="p-3 bg-brand-primary/10 border border-brand-primary/20 rounded-full flex items-center justify-center shrink-0">
+                <Flame className="h-5 w-5 text-brand-primary" />
+              </div>
             </div>
-            <div className="p-3 bg-bg-secondary border border-border-default rounded-lg text-text-secondary">
-              <Flame className="h-5 w-5 text-state-warning" />
-            </div>
+            <p className="text-[10px] text-text-secondary font-medium">
+              Safe low: {stats ? parseFloat(stats.gasPriceGwei) * 0.9 : 0} Gwei
+            </p>
           </CardContent>
         </Card>
 
         {/* Network Activity/Price Card */}
-        <Card className="relative overflow-hidden">
-          <CardContent className="p-5 flex items-center justify-between">
-            <div className="space-y-1">
-              <span className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest">
-                Market Price
-              </span>
-              <h3 className="text-lg font-extrabold text-text-primary flex items-baseline gap-1">
-                {statsLoading ? <Skeleton className="h-7 w-28" /> : `$${stats?.ethPriceUsd}`}
-                <span className="text-xs font-semibold text-text-secondary">USD</span>
-              </h3>
-              <p className="text-[10px] text-text-secondary font-medium">
-                Cap: ${stats?.marketCapUsd}
-              </p>
+        <Card className="relative overflow-hidden bg-bg-primary/40 border-border-default/50 hover:border-brand-primary/30 transition-all duration-200">
+          <CardContent className="p-6 flex flex-col gap-4">
+            <div className="flex items-start justify-between">
+              <div className="space-y-2 flex-1">
+                <span className="text-[9px] font-bold text-text-tertiary uppercase tracking-widest block">
+                  Market Price
+                </span>
+                <h3 className="text-2xl font-extrabold text-text-primary flex items-baseline gap-1">
+                  {statsLoading ? <Skeleton className="h-8 w-28" /> : `$${stats?.ethPriceUsd}`}
+                  <span className="text-xs font-semibold text-text-secondary">USD</span>
+                </h3>
+              </div>
+              <div className="p-3 bg-brand-primary/10 border border-brand-primary/20 rounded-full flex items-center justify-center shrink-0">
+                <TrendingUp className="h-5 w-5 text-brand-primary" />
+              </div>
             </div>
-            <div className="p-3 bg-bg-secondary border border-border-default rounded-lg text-text-secondary">
-              <TrendingUp className="h-5 w-5 text-accent-token" />
-            </div>
+            <p className="text-[10px] text-text-secondary font-medium">
+              Cap: ${stats?.marketCapUsd}
+            </p>
           </CardContent>
         </Card>
       </div>
 
       {/* Network Activity Chart & Metrics Selector */}
       <div className="grid grid-cols-1 gap-6">
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 bg-bg-primary/40 border border-border-default/50 rounded-lg p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Activity className="h-5 w-5 text-brand-primary" />
@@ -184,15 +198,15 @@ export default function Dashboard() {
                 Network History
               </h3>
             </div>
-            <div className="flex gap-1.5 p-1 bg-bg-secondary rounded-lg border border-border-default">
+            <div className="flex gap-2 p-1.5 bg-bg-secondary/60 rounded-lg border border-border-default/60">
               {(["tps", "gas", "volume"] as const).map((metric) => (
                 <button
                   key={metric}
                   onClick={() => setChartMetric(metric)}
-                  className={`px-2.5 py-1 text-[10px] font-bold rounded-md uppercase transition-all ${
+                  className={`px-3 py-1.5 text-[10px] font-bold rounded-md uppercase transition-all duration-150 ease-out ${
                     chartMetric === metric
-                      ? "bg-bg-tertiary text-text-primary shadow-sm"
-                      : "text-text-secondary hover:text-text-primary"
+                      ? "bg-brand-primary text-white shadow-sm"
+                      : "text-text-secondary hover:text-text-primary hover:bg-bg-tertiary/50"
                   }`}
                 >
                   {metric}
@@ -235,7 +249,10 @@ export default function Dashboard() {
               ))
             ) : (
               blocks.map((block) => (
-                <div key={block.number} className="p-4 flex items-center justify-between gap-4">
+                <div
+                  key={block.number}
+                  className={`p-4 flex items-center justify-between gap-4 border border-transparent ${hoverCard}`}
+                >
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded bg-bg-secondary border border-border-default flex flex-col items-center justify-center shrink-0">
                       <Layers className="h-4 w-4 text-accent-block" />
@@ -297,7 +314,10 @@ export default function Dashboard() {
               ))
             ) : (
               transactions.map((tx) => (
-                <div key={tx.hash} className="p-4 flex items-center justify-between gap-4">
+                <div
+                  key={tx.hash}
+                  className={`p-4 flex items-center justify-between gap-4 border border-transparent ${hoverCard}`}
+                >
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded bg-bg-secondary border border-border-default flex flex-col items-center justify-center shrink-0">
                       <Database className="h-4 w-4 text-accent-transaction" />

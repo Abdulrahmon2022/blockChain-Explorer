@@ -36,7 +36,7 @@ export function Header() {
                 value={network}
                 onChange={(e) => setNetwork(e.target.value)}
                 options={networkOptions}
-                className="py-1 px-2.5 !text-xs font-semibold !h-8 bg-bg-secondary border-border-default text-text-primary"
+                className="py-1 px-2.5 !text-xs font-semibold !h-8 bg-bg-secondary border-border-full text-text-primary"
               />
             </div>
           </div>
