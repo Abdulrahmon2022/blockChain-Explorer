@@ -42,7 +42,7 @@ export function TransactionTable({
 
   return (
     <div className="flex flex-col">
-      <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden bg-white dark:bg-zinc-950 shadow-sm">
+      <div className="border border-border-default rounded-xl overflow-hidden bg-bg-tertiary shadow-sm">
         <Table>
           <TableHeader>
             <TableRow>

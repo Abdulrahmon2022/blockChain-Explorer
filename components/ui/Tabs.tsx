@@ -28,7 +28,7 @@ export function Tabs({ defaultValue, children, className = "", ...props }: TabsP
 export function TabsList({ children, className = "", ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={`inline-flex items-center gap-1 p-1 bg-zinc-100 dark:bg-zinc-900 rounded-lg border border-zinc-200/50 dark:border-zinc-800/50 ${className}`}
+      className={`inline-flex items-center gap-1 p-1 rounded-lg border border-border-default bg-bg-secondary/80 ${className}`}
       {...props}
     >
       {children}
@@ -52,8 +52,8 @@ export function TabsTrigger({ value, children, className = "", ...props }: TabsT
       onClick={() => context.setActiveTab(value)}
       className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
         isActive
-          ? "bg-white text-zinc-950 shadow-sm dark:bg-zinc-950 dark:text-zinc-50"
-          : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+          ? "bg-bg-tertiary text-text-primary shadow-sm border border-border-default"
+          : "text-text-secondary hover:text-text-primary hover:bg-bg-tertiary/70"
       } ${className}`}
       {...props}
     >
