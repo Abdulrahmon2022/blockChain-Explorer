@@ -1,26 +1,171 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;850&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Light Mode Design Tokens */
+  --bg-primary: #F8FAFC;
+  --bg-secondary: #F1F5F9;
+  --bg-tertiary: #FFFFFF;
+  --bg-elevated: #FFFFFF;
+  --bg-footer: #F1F5F9;
+
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-tertiary: #64748B;
+  --text-disabled: #94A3B8;
+
+  --border-default: #E2E8F0;
+  --border-strong: #CBD5E1;
+  --border-hover: #B8C4D6;
+  --border-focus: #4D7CFE;
+
+  /* Accent Color Tokens */
+  --brand-primary: #4D7CFE;
+  --brand-hover: #6B93FF;
+  --brand-active: #3B68E8;
+  --brand-soft: rgba(77, 124, 254, 0.1);
+  --brand-border: rgba(77, 124, 254, 0.2);
+
+  /* Semantic Colors */
+  --state-success: #22C55E;
+  --state-success-soft: rgba(34, 197, 94, 0.1);
+  --state-success-border: rgba(34, 197, 94, 0.2);
+
+  --state-error: #EF4444;
+  --state-error-soft: rgba(239, 68, 68, 0.1);
+  --state-error-border: rgba(239, 68, 68, 0.2);
+
+  --state-warning: #F59E0B;
+  --state-warning-soft: rgba(245, 158, 11, 0.1);
+  --state-warning-border: rgba(245, 158, 11, 0.2);
+
+  --state-info: #38BDF8;
+  --state-info-soft: rgba(56, 189, 248, 0.1);
+  --state-info-border: rgba(56, 189, 248, 0.2);
+
+  /* Blockchain-Specific Accents */
+  --accent-address: #60A5FA;
+  --accent-transaction: #A78BFA;
+  --accent-block: #38BDF8;
+  --accent-token: #FBBF24;
+  --accent-contract: #F472B6;
+  --accent-validator: #34D399;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.dark {
+  /* Dark Mode Design Tokens (Dark Navy tone, not pure black) */
+  --bg-primary: #0B0F19;
+  --bg-secondary: #101623;
+  --bg-tertiary: #151C2B;
+  --bg-elevated: #192235;
+  --bg-footer: #080C14;
+
+  --text-primary: #F8FAFC;
+  --text-secondary: #A7B0C0;
+  --text-tertiary: #707B8F;
+  --text-disabled: #4B5568;
+
+  --border-default: #222B3D;
+  --border-strong: #2E3A50;
+  --border-hover: #3B4A65;
+  --border-focus: #4D7CFE;
+
+  /* Accent Color Tokens */
+  --brand-primary: #4D7CFE;
+  --brand-hover: #6B93FF;
+  --brand-active: #3B68E8;
+  --brand-soft: rgba(77, 124, 254, 0.1);
+  --brand-border: rgba(77, 124, 254, 0.2);
+
+  /* Semantic Colors */
+  --state-success: #22C55E;
+  --state-success-soft: rgba(34, 197, 94, 0.1);
+  --state-success-border: rgba(34, 197, 94, 0.2);
+
+  --state-error: #EF4444;
+  --state-error-soft: rgba(239, 68, 68, 0.1);
+  --state-error-border: rgba(239, 68, 68, 0.2);
+
+  --state-warning: #F59E0B;
+  --state-warning-soft: rgba(245, 158, 11, 0.1);
+  --state-warning-border: rgba(245, 158, 11, 0.2);
+
+  --state-info: #38BDF8;
+  --state-info-soft: rgba(56, 189, 248, 0.1);
+  --state-info-border: rgba(56, 189, 248, 0.2);
+
+  /* Blockchain-Specific Accents */
+  --accent-address: #60A5FA;
+  --accent-transaction: #A78BFA;
+  --accent-block: #38BDF8;
+  --accent-token: #FBBF24;
+  --accent-contract: #F472B6;
+  --accent-validator: #34D399;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@theme {
+  /* Set fonts */
+  --font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Custom spacings and layout tokens */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  /* Mapping colors to tailwind styles */
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-tertiary: var(--bg-tertiary);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-bg-footer: var(--bg-footer);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-text-disabled: var(--text-disabled);
+
+  --color-border-default: var(--border-default);
+  --color-border-strong: var(--border-strong);
+  --color-border-hover: var(--border-hover);
+  --color-border-focus: var(--border-focus);
+
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-active: var(--brand-active);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-border: var(--brand-border);
+
+  --color-state-success: var(--state-success);
+  --color-state-success-soft: var(--state-success-soft);
+  --color-state-success-border: var(--state-success-border);
+
+  --color-state-error: var(--state-error);
+  --color-state-error-soft: var(--state-error-soft);
+  --color-state-error-border: var(--state-error-border);
+
+  --color-state-warning: var(--state-warning);
+  --color-state-warning-soft: var(--state-warning-soft);
+  --color-state-warning-border: var(--state-warning-border);
+
+  --color-state-info: var(--state-info);
+  --color-state-info-soft: var(--state-info-soft);
+  --color-state-info-border: var(--state-info-border);
+
+  /* Blockchain accents */
+  --color-accent-address: var(--accent-address);
+  --color-accent-transaction: var(--accent-transaction);
+  --color-accent-block: var(--accent-block);
+  --color-accent-token: var(--accent-token);
+  --color-accent-contract: var(--accent-contract);
+  --color-accent-validator: var(--accent-validator);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  transition-property: background-color, border-color, text-decoration-color, fill, stroke, opacity;
+  transition-duration: 150ms;
 }
