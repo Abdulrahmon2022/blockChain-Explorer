@@ -1,11 +1,12 @@
 "use client";
 
-import React, { use, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { getAddress } from "@/services/address.service";
 import { getTransactionsByAddress } from "@/services/transaction.service";
 import { getTokenTransfers } from "@/services/token.service";
+import { getContractProvider } from "@/services/contracts/provider";
 import { formatNativeCurrency, formatTokenAmount } from "@/lib/utils/numbers";
 import { shortenAddress } from "@/lib/utils/addresses";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
@@ -26,6 +27,7 @@ export default function AddressPage(props: PageProps<"/addresses/[address]">) {
   const decodedAddress = decodeURIComponent(address);
 
   const [activeTab, setActiveTab] = useState("transactions");
+  const [isContractAddress, setIsContractAddress] = useState(false);
   
   // Pagination for transactions
   const txPage = usePagination({ initialPage: 1, initialPageSize: 10 });
@@ -49,6 +51,37 @@ export default function AddressPage(props: PageProps<"/addresses/[address]">) {
     queryKey: ["addressTransfers", decodedAddress, transferPage.currentPage],
     queryFn: () => getTokenTransfers(transferPage.currentPage, transferPage.pageSize, undefined, decodedAddress),
   });
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function detectContractType() {
+      const provider = getContractProvider();
+      if (!provider) {
+        if (isMounted) {
+          setIsContractAddress(false);
+        }
+        return;
+      }
+
+      try {
+        const code = await provider.getCode(decodedAddress);
+        if (isMounted) {
+          setIsContractAddress(code !== "0x");
+        }
+      } catch {
+        if (isMounted) {
+          setIsContractAddress(false);
+        }
+      }
+    }
+
+    void detectContractType();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [decodedAddress]);
 
   const info = addressRes?.data;
   const txs = txsRes?.data || [];
@@ -160,7 +193,7 @@ export default function AddressPage(props: PageProps<"/addresses/[address]">) {
             <TabsTrigger value="transfers" onClick={() => setActiveTab("transfers")}>
               Token Transfers
             </TabsTrigger>
-            {info?.isContract && (
+            {(info?.isContract || isContractAddress) && (
               <TabsTrigger value="contract" onClick={() => setActiveTab("contract")}>
                 Contract Execution
               </TabsTrigger>
@@ -268,7 +301,7 @@ export default function AddressPage(props: PageProps<"/addresses/[address]">) {
         </TabsContent>
 
         {/* Contract Read/Write Tab */}
-        {info?.isContract && (
+        {(info?.isContract || isContractAddress) && (
           <TabsContent value="contract">
             <Card>
               <CardContent className="p-6 space-y-4">
