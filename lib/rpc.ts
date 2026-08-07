@@ -17,7 +17,9 @@ import {
  */
 
 export const RPC_URL =
-  process.env.SEPOLIA_RPC_URL ?? "https://ethereum-sepolia-rpc.publicnode.com";
+  process.env.NEXT_PUBLIC_RPC_URL ??
+  process.env.SEPOLIA_RPC_URL ??
+  "https://ethereum-sepolia-rpc.publicnode.com";
 
 /** How far back we are willing to walk when building "recent" lists. */
 const MAX_BLOCK_SCAN = 20;
