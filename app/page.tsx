@@ -331,7 +331,8 @@ export default function Dashboard() {
                         {formatNativeCurrency(tx.value)}
                       </span>
                       <p className="text-[10px] text-text-tertiary">
-                        Fee: {parseFloat(formatNativeCurrency(tx.gasUsed ? tx.gasUsed * tx.gasPrice : 21000n * tx.gasPrice)).toFixed(5)}
+                        {/* formatNativeCurrency can return "< 0.0001 ETH", which parseFloat turns into NaN */}
+                        Fee: {formatNativeCurrency(tx.gasUsed ? tx.gasUsed * tx.gasPrice : 21000n * tx.gasPrice)}
                       </p>
                     </div>
                     <div className="shrink-0 hidden sm:block">
