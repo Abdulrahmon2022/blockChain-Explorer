@@ -44,13 +44,13 @@ export default async function BlockPage(props: PageProps<"/blocks/[id]">) {
         
         {/* Previous / Next Block buttons */}
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="h-8 !p-2" disabled={block.number <= 0}>
+          <Button variant="outline" size="sm" className="h-8 p-2" disabled={block.number <= 0}>
             <Link href={`/blocks/${block.number - 1}`} className="flex items-center gap-1">
               <ChevronLeft className="h-4 w-4" />
               Prev
             </Link>
           </Button>
-          <Button variant="outline" size="sm" className="h-8 !p-2">
+          <Button variant="outline" size="sm" className="h-8 p-2">
             <Link href={`/blocks/${block.number + 1}`} className="flex items-center gap-1">
               Next
               <ChevronRight className="h-4 w-4" />
