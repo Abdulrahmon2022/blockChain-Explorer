@@ -3,9 +3,10 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { 
-  getNetworkStats, 
-  getChartStats 
+import {
+  getNetworkStats,
+  getChartStats,
+  getMarketPrice
 } from "@/services/blockchain.service";
 import { getLatestBlocks } from "@/services/block.service";
 import { getLatestTransactions } from "@/services/transaction.service";
@@ -18,14 +19,21 @@ import { HashDisplay } from "@/components/blockchain/HashDisplay";
 import { StatusBadge } from "@/components/blockchain/StatusBadge";
 import { formatRelativeTime } from "@/lib/utils/dates";
 import { formatNativeCurrency } from "@/lib/utils/numbers";
-import { 
-  Database, 
-  Layers, 
-  Flame, 
-  TrendingUp, 
+import {
+  Database,
+  Layers,
+  Flame,
+  TrendingUp,
+  TrendingDown,
   Activity,
   RefreshCw
 } from "lucide-react";
+
+/** Dashboard cards refresh on their own; these intervals mirror each query's server-side cache TTL. */
+const STATS_POLL_MS = 15_000;
+const LIST_POLL_MS = 12_000;
+const CHART_POLL_MS = 30_000;
+const PRICE_POLL_MS = 30_000;
 
 export default function Dashboard() {
   const [chartMetric, setChartMetric] = useState<"tps" | "gas" | "volume">("tps");
@@ -33,32 +41,45 @@ export default function Dashboard() {
   const { data: statsRes, isLoading: statsLoading, refetch: refetchStats } = useQuery({
     queryKey: ["networkStats"],
     queryFn: () => getNetworkStats(),
+    refetchInterval: STATS_POLL_MS,
+  });
+
+  const { data: priceRes, isLoading: priceLoading, refetch: refetchPrice } = useQuery({
+    queryKey: ["marketPrice"],
+    queryFn: () => getMarketPrice(),
+    refetchInterval: PRICE_POLL_MS,
   });
 
   const { data: blocksRes, isLoading: blocksLoading, refetch: refetchBlocks } = useQuery({
     queryKey: ["latestBlocks"],
     queryFn: () => getLatestBlocks(8),
+    refetchInterval: LIST_POLL_MS,
   });
 
   const { data: txsRes, isLoading: txsLoading, refetch: refetchTxs } = useQuery({
     queryKey: ["latestTransactions"],
     queryFn: () => getLatestTransactions(8),
+    refetchInterval: LIST_POLL_MS,
   });
 
-  const { data: chartRes, isLoading: chartLoading } = useQuery({
+  const { data: chartRes, isLoading: chartLoading, refetch: refetchChart } = useQuery({
     queryKey: ["chartStats", chartMetric],
     queryFn: () => getChartStats(chartMetric),
+    refetchInterval: CHART_POLL_MS,
   });
 
   const stats = statsRes?.data;
+  const price = priceRes?.data;
   const blocks = blocksRes?.data || [];
   const transactions = txsRes?.data || [];
   const chartData = chartRes?.data || [];
 
   const handleRefresh = () => {
     refetchStats();
+    refetchPrice();
     refetchBlocks();
     refetchTxs();
+    refetchChart();
   };
 
   // Shared hover treatment for card-like surfaces
@@ -170,19 +191,32 @@ export default function Dashboard() {
             <div className="flex items-start justify-between">
               <div className="space-y-2 flex-1">
                 <span className="text-[9px] font-bold text-text-tertiary uppercase tracking-widest block">
-                  Market Price
+                  ETH Market Price
                 </span>
                 <h3 className="text-2xl font-extrabold text-text-primary flex items-baseline gap-1">
-                  {statsLoading ? <Skeleton className="h-8 w-28" /> : `$${stats?.ethPriceUsd}`}
+                  {priceLoading ? (
+                    <Skeleton className="h-8 w-28" />
+                  ) : (
+                    `$${(price?.ethPriceUsd ?? 0).toLocaleString("en-US", { maximumFractionDigits: 2 })}`
+                  )}
                   <span className="text-xs font-semibold text-text-secondary">USD</span>
                 </h3>
               </div>
               <div className="p-3 bg-brand-primary/10 border border-brand-primary/20 rounded-full flex items-center justify-center shrink-0">
-                <TrendingUp className="h-5 w-5 text-brand-primary" />
+                {(price?.change24hPct ?? 0) < 0 ? (
+                  <TrendingDown className="h-5 w-5 text-state-error" />
+                ) : (
+                  <TrendingUp className="h-5 w-5 text-brand-primary" />
+                )}
               </div>
             </div>
             <p className="text-[10px] text-text-secondary font-medium">
-              Cap: ${stats?.marketCapUsd}
+              Cap: ${(price?.marketCapUsd ?? 0).toLocaleString("en-US", { notation: "compact", maximumFractionDigits: 2 })}
+              {" · "}
+              <span className={(price?.change24hPct ?? 0) < 0 ? "text-state-error" : "text-state-success"}>
+                {(price?.change24hPct ?? 0) >= 0 ? "+" : ""}
+                {(price?.change24hPct ?? 0).toFixed(2)}% 24h
+              </span>
             </p>
           </CardContent>
         </Card>

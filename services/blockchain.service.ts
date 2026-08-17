@@ -7,9 +7,13 @@ export interface NetworkStats {
   totalTransactions: number;
   gasPriceGwei: string;
   tps: number;
-  marketCapUsd: string;
-  ethPriceUsd: number;
   blockTimeSec: number;
+}
+
+export interface MarketPrice {
+  ethPriceUsd: number;
+  marketCapUsd: number;
+  change24hPct: number;
 }
 
 interface ChainStats {
@@ -40,9 +44,6 @@ export async function getNetworkStats(): Promise<ApiResponse<NetworkStats>> {
       gasPriceGwei: weiToGwei(data.gasPriceWei),
       tps: data.tps,
       blockTimeSec: data.blockTimeSec,
-      // Sepolia ETH has no market value and there is no on-chain price feed here.
-      marketCapUsd: "N/A",
-      ethPriceUsd: 0,
     },
     error,
   };
@@ -52,4 +53,29 @@ export async function getChartStats(
   metric: "tps" | "gas" | "volume"
 ): Promise<ApiResponse<ChartPoint[]>> {
   return apiGet<ChartPoint[]>(`/api/stats/chart${query({ metric })}`, []);
+}
+
+interface RawEthPrice {
+  usd: number;
+  usdMarketCap: number;
+  usd24hChange: number;
+}
+
+const EMPTY_PRICE: RawEthPrice = { usd: 0, usdMarketCap: 0, usd24hChange: 0 };
+
+/**
+ * Real ETH/USD market reference (mainnet price via CoinGecko) — Sepolia ETH
+ * itself has no market value, so this is shown as context, not a testnet price.
+ */
+export async function getMarketPrice(): Promise<ApiResponse<MarketPrice>> {
+  const { data, error } = await apiGet<RawEthPrice>("/api/price", EMPTY_PRICE);
+
+  return {
+    data: {
+      ethPriceUsd: data.usd,
+      marketCapUsd: data.usdMarketCap,
+      change24hPct: data.usd24hChange,
+    },
+    error,
+  };
 }
